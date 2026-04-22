@@ -180,7 +180,7 @@ function HeroSection() {
               >
                 {/* Top Image - Old Photo */}
                 <img
-                  src="/public/old-photo.jpg"
+                  src="/images/old-photo.jpg"
                   alt="Old wedding photo"
                   className="w-full h-56 object-cover"
                 />
@@ -267,7 +267,7 @@ function HeroSection() {
 
                 {/* Bottom Image Placeholder */}
                 <img
-                  src="/public/now-photo.jpg"
+                  src="/images/now-photo.jpg"
                   alt="Current wedding photo"
                   className="w-full h-56 object-cover"
                 />
