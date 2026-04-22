@@ -10,7 +10,6 @@ export const ROUTE_PATHS = {
 // ============================================================
 export interface RSVPFormData {
   name: string;
-  email: string;
   guestCount: number;
   message: string;
 }
@@ -35,7 +34,6 @@ export const EVENT_DETAILS = {
   date: "Saturday, August 29, 2026",
   time: "17:00 PM",
   venue: "Angke Heritage - PIK 2, Lounge Room",
-  address: "Jl. M.H Thamrin Kav DJ-09, Jl. M.H. Thamrin, Salembaran, Kec. Kosambi, Kabupaten Tangerang, Banten",
   dressCode: "Black Semi-Formal",
   rsvpDeadline: "August 1, 2026",
 };

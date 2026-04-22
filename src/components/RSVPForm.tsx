@@ -15,7 +15,6 @@ import { toast } from "@/components/ui/sonner";
 
 const rsvpSchema = z.object({
   name: z.string().min(2, "Please enter your full name"),
-  email: z.string().email("Please enter a valid email address"),
   guestCount: z.number().min(1).max(10),
   message: z.string().optional(),
 });
@@ -60,26 +59,12 @@ export function RSVPForm({ onSuccess }: RSVPFormProps) {
       const supabase = getSupabaseClient();
       const { error } = await supabase.from("rsvps").insert({
         name: data.name,
-        email: data.email,
         guest_count: data.guestCount,
         message: data.message?.trim() || null,
       });
 
       if (error) {
         throw error;
-      }
-
-      // Fire and forget confirmation email so RSVP success isn't blocked.
-      try {
-        await supabase.functions.invoke("send-rsvp-confirmation", {
-          body: {
-            name: data.name,
-            email: data.email,
-            guestCount: data.guestCount,
-          },
-        });
-      } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
       }
 
       onSuccess(data);
@@ -152,23 +137,6 @@ export function RSVPForm({ onSuccess }: RSVPFormProps) {
             />
             {errors.name && (
               <p className="text-destructive text-xs mt-1">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm font-medium text-foreground/80">
-              Email Address *
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="jane@example.com"
-              {...register("email")}
-              className="rounded-xl border-border/60 focus-visible:ring-ring/50 bg-background/60"
-            />
-            {errors.email && (
-              <p className="text-destructive text-xs mt-1">{errors.email.message}</p>
             )}
           </div>
 

@@ -251,8 +251,6 @@ function HeroSection() {
                   {/* Location */}
                   <div className="text-s space-y-1">
                     <p className="font-semibold">{EVENT_DETAILS.venue}</p>
-                    <p>{EVENT_DETAILS.address}</p>
-                    <p className="text-sm text-muted-foreground">Lounge Room</p>
                     <p className="mt-3">
                       <span className="font-semibold">Time:</span> {EVENT_DETAILS.time}
                     </p>
@@ -379,7 +377,7 @@ function CountdownSection() {
 // ─── Event Details Section ─────────────────────────────────────────────────────
 function EventDetailsSection() {
   const details = [
-    { icon: Calendar, label: "Date", value: EVENT_DETAILS.date, emoji: "📅" },
+    { icon: Calendar, label: "Date", value: EVENT_DETAILS.date, emoji: "📆" },
     { icon: Clock, label: "Time", value: EVENT_DETAILS.time, emoji: "⏰" },
     { icon: MapPin, label: "Venue", value: EVENT_DETAILS.venue, sub: EVENT_DETAILS.address, emoji: "📍" },
     { icon: Shirt, label: "Dress Code", value: EVENT_DETAILS.dressCode, emoji: "👗" },
@@ -461,7 +459,6 @@ function EventDetailsSection() {
                 <p className="font-semibold text-foreground text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Angke Heritage - PIK 2
                 </p>
-                <p className="text-sm text-muted-foreground">Jl. M.H Thamrin Kav DJ-09, Jl. M.H. Thamrin, Salembaran, Kec. Kosambi, Kabupaten Tangerang, Banten</p>
                 <motion.a
                   href="https://maps.app.goo.gl/aRJ9n4Ff717BWwdd7"
                   target="_blank"
@@ -744,7 +741,7 @@ function FooterSection() {
         </h3>
         <GoldDivider />
         <p className="text-xs text-muted-foreground">
-          Made with by Viona for our very special grandparents.
+          Made by Viona for our very special grandparents.
         </p>
       </motion.div>
     </footer>
