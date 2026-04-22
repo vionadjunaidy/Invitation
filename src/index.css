@@ -1,0 +1,217 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+==========================================================================
+【AI HANDOVER NOTE】
+1. DESIGN PHILOSOPHY:
+   - Vintage Chinese Celebration Aesthetic: This design system embodies timeless elegance and cultural richness for a dual-celebration invitation. The philosophy centers on creating a memorable experience that honors both a milestone birthday and a golden anniversary through traditional Chinese aesthetics.
+   - Visual Style: Warm Vintage Minimalism with refined interactive elements. Think cream/off-white backgrounds with warm sepia and deep red accents, elegant serif typography for gravitas, and delightful micro-interactions (confetti bursts, decorative elements, envelope reveals) that evoke nostalgia and tradition.
+   - Why This Style: Family celebrations demand approachability and warmth while maintaining sophistication. The sepia-brown-red palette evokes tradition, prosperity, and festivity—perfect for multi-generational gatherings and honoring cultural heritage.
+
+2. TYPOGRAPHY:
+   - Sans (Inter): Provides excellent readability for body text, event details, and form labels. Its neutral, friendly character ensures accessibility across all ages. Used for all UI elements and body copy.
+   - Mono (JetBrains Mono): Reserved for technical elements like countdown timer digits, RSVP confirmation codes, and any data display. Its clean appearance adds a subtle contemporary touch to numeric information.
+   - Serif (Playfair Display): Chosen for its editorial elegance. Perfect for hero headlines announcing the dual celebration. The high contrast and graceful curves convey timelessness and tradition.
+
+3. COLOR SYSTEM:
+   - Brand Primary (Warm Sepia Brown): Hue 35° chosen for its warm, earthy quality—evoking tradition, heritage, and warmth. This sepia-brown serves as the emotional anchor.
+   - --brand maps to --primary for CTA buttons and key interactive elements
+   - --accent uses a deep crimson red (Hue 15°) for secondary actions and hover states, evoking prosperity and celebration
+   - --ring uses warm ochre-gold (Hue 35°) for focus states, creating elegant accents
+   - Success (soft green): For RSVP confirmation states
+   - Muted tones: Warm beige/taupe for subtle backgrounds and disabled states
+   - Warm accents (chart colors): Used for decorative elements, borders, and celebratory highlights
+
+4. USAGE GUIDE:
+   - Layout: Centered container (max-width 1200px) with generous vertical spacing. Hero section full-bleed with overlay text.
+   - Recommended Effects:
+     * Confetti animations on load and RSVP success (use framer-motion with warm earth tones)
+     * Subtle backdrop-blur on card overlays (backdrop-blur-md)
+     * Floating animation for decorative elements
+     * Envelope-opening reveal for invitation content
+     * Smooth fade-in-up animations for sections
+   - Interactive Elements:
+     * Primary buttons: Warm brown with red accents on hover
+     * Form inputs: Soft borders with ochre focus ring
+     * Cards: Subtle shadow with warm glow on hover
+   - Accessibility: Ensure all text meets WCAG AA contrast (especially on cream backgrounds). Provide reduced-motion alternatives for animations.
+   - Special Notes: Use --chart-1 through --chart-5 for decorative warm/red accents, confetti colors, and celebratory highlights throughout the page.
+==========================================================================*/
+
+:root {
+  /* Typography */
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: JetBrains Mono, 'Courier New', monospace;
+  
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Core UI Tokens */
+  --background: oklch(0.97 0.02 38);
+  --foreground: oklch(0.25 0.03 35);
+  --card: oklch(0.96 0.015 40);
+  --card-foreground: oklch(0.22 0.03 35);
+  --popover: oklch(0.96 0.015 40);
+  --popover-foreground: oklch(0.22 0.03 35);
+  --primary: oklch(0.48 0.22 38);
+  --primary-foreground: oklch(0.98 0.01 40);
+  --secondary: oklch(0.45 0.23 33);
+  --secondary-foreground: oklch(0.97 0.01 40);
+  --muted: oklch(0.90 0.02 38);
+  --muted-foreground: oklch(0.55 0.03 35);
+  --accent: oklch(0.55 0.20 33);
+  --accent-foreground: oklch(0.97 0.01 40);
+  --destructive: oklch(0.50 0.22 30);
+  --destructive-foreground: oklch(0.97 0.01 40);
+  --border: oklch(0.85 0.03 38);
+  --input: oklch(0.88 0.03 38);
+  --ring: oklch(0.50 0.20 38);
+  
+  /* Chart Tokens */
+  --chart-1: oklch(0.55 0.22 38);
+  --chart-2: oklch(0.50 0.20 38);
+  --chart-3: oklch(0.45 0.23 33);
+  --chart-4: oklch(0.52 0.21 36);
+  --chart-5: oklch(0.60 0.18 40);
+  
+  /* Sidebar Tokens */
+  --sidebar: oklch(0.96 0.015 40);
+  --sidebar-foreground: oklch(0.25 0.03 35);
+  --sidebar-primary: oklch(0.48 0.22 38);
+  --sidebar-primary-foreground: oklch(0.98 0.01 40);
+  --sidebar-accent: oklch(0.55 0.20 33);
+  --sidebar-accent-foreground: oklch(0.97 0.01 40);
+  --sidebar-border: oklch(0.85 0.03 38);
+  --sidebar-ring: oklch(0.50 0.20 38);
+}
+
+.dark {
+  --background: oklch(0.18 0.02 35);
+  --foreground: oklch(0.92 0.02 40);
+  --card: oklch(0.22 0.03 35);
+  --card-foreground: oklch(0.92 0.02 40);
+  --popover: oklch(0.20 0.03 35);
+  --popover-foreground: oklch(0.92 0.02 40);
+  --primary: oklch(0.60 0.22 38);
+  --primary-foreground: oklch(0.18 0.02 35);
+  --secondary: oklch(0.55 0.23 33);
+  --secondary-foreground: oklch(0.18 0.02 35);
+  --muted: oklch(0.30 0.03 35);
+  --muted-foreground: oklch(0.72 0.02 40);
+  --accent: oklch(0.65 0.20 33);
+  --accent-foreground: oklch(0.18 0.02 35);
+  --destructive: oklch(0.60 0.22 30);
+  --destructive-foreground: oklch(0.92 0.02 40);
+  --border: oklch(0.35 0.03 35);
+  --input: oklch(0.32 0.03 35);
+  --ring: oklch(0.62 0.20 38);
+  
+  /* Chart Tokens */
+  --chart-1: oklch(0.65 0.22 38);
+  --chart-2: oklch(0.60 0.22 38);
+  --chart-3: oklch(0.55 0.23 33);
+  --chart-4: oklch(0.58 0.22 36);
+  --chart-5: oklch(0.68 0.20 40);
+  
+  /* Sidebar Tokens */
+  --sidebar: oklch(0.20 0.03 35);
+  --sidebar-foreground: oklch(0.90 0.02 40);
+  --sidebar-primary: oklch(0.60 0.22 38);
+  --sidebar-primary-foreground: oklch(0.18 0.02 35);
+  --sidebar-accent: oklch(0.65 0.20 33);
+  --sidebar-accent-foreground: oklch(0.18 0.02 35);
+  --sidebar-border: oklch(0.35 0.03 35);
+  --sidebar-ring: oklch(0.62 0.20 38);
+}
+
+@theme inline {
+  /* Shadcn Core Mapping */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Charts Mapping */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar Mapping */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Typography */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Radius */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans min-h-screen;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  code, pre {
+    @apply font-mono;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-primary;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40;
+  }
+}
