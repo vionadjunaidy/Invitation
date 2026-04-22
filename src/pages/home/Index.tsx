@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Clock, Calendar, Shirt, PartyPopper, Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -13,6 +13,42 @@ function DecorativeStar({ size = 16, style }: { size?: number; style?: React.CSS
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={style}>
       <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
     </svg>
+  );
+}
+
+function BackgroundMusic() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.35;
+
+    // Try immediate autoplay first.
+    void audio.play().catch(() => {
+      // Some browsers require user interaction before audio can start.
+    });
+
+    const resumeAudio = () => {
+      void audio.play().catch(() => {
+        // Ignore if still blocked by browser policy.
+      });
+    };
+
+    window.addEventListener("click", resumeAudio, { once: true });
+    window.addEventListener("touchstart", resumeAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("click", resumeAudio);
+      window.removeEventListener("touchstart", resumeAudio);
+    };
+  }, []);
+
+  return (
+    <audio ref={audioRef} loop autoPlay preload="auto" hidden>
+      <source src="/music/background.mp3" type="audio/mpeg" />
+    </audio>
   );
 }
 
@@ -819,6 +855,7 @@ function NavBar() {
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <BackgroundMusic />
       <NavBar />
       <HeroSection />
       <CountdownSection />
