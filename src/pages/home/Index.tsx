@@ -93,7 +93,7 @@ function HeroSection() {
                 }}
               >
                 <Sparkles className="w-3 h-3" />
-                A Special Dual Celebration
+                A Special Celebration
                 <Sparkles className="w-3 h-3" />
               </motion.div>
 
