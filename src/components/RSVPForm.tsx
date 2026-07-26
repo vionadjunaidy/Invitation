@@ -117,7 +117,7 @@ export function RSVPForm({ onSuccess }: RSVPFormProps) {
             RSVP Now
           </h3>
           <p className="text-muted-foreground text-sm">
-            Kindly confirm your attendance by August 1st
+            Kindly confirm your attendance by August 17th
           </p>
         </div>
 
@@ -314,9 +314,9 @@ export function RSVPSuccess({ name, guestCount, onClose }: RSVPSuccessProps) {
         <GoldDivider />
 
         <div className="flex flex-col gap-2 mt-6 text-sm text-muted-foreground">
-          <p>📅 Saturday, August 29, 2026 at 17:00 PM</p>
-          <p>📍 Angke Heritage - PIK 2, Lounge Room</p>
-          <p>👗 Black Semi-Formal </p>
+          <p>Saturday, August 29, 2026 at 17:00 PM</p>
+          <p>Angke Heritage - PIK 2, Lounge Room</p>
+          <p>Black Semi-Formal </p>
         </div>
 
         <motion.button

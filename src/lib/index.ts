@@ -35,8 +35,14 @@ export const EVENT_DETAILS = {
   time: "17:00 PM",
   venue: "Angke Heritage - PIK 2, Lounge Room",
   dressCode: "Black Semi-Formal",
-  rsvpDeadline: "August 1, 2026",
+  rsvpDeadline: "August 17th, 2026",
 };
+
+export const AUDIO_PATHS = {
+  background: "/music/background.mp3",
+  /** Drop your sound effect file at public/music/surprise.mp3 */
+  surprise: "/music/surprise.mp3",
+} as const;
 
 export const CONFETTI_COLORS = [
   "#6b5344",

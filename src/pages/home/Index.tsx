@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Clock, Calendar, Shirt, PartyPopper, Heart, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Confetti, FloatingElement, SectionReveal, AnimatedCounter, GoldDivider } from "@/components/Animations";
 import { RSVPForm, RSVPSuccess } from "@/components/RSVPForm";
-import { type RSVPFormData, EVENT_DETAILS } from "@/lib/index";
+import { type RSVPFormData, EVENT_DETAILS, AUDIO_PATHS } from "@/lib/index";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 
 // ─── Decorative Stars ──────────────────────────────────────────────────────────
@@ -16,55 +16,101 @@ function DecorativeStar({ size = 16, style }: { size?: number; style?: React.CSS
   );
 }
 
-function BackgroundMusic() {
+function BackgroundMusic({ onPlayReady }: { onPlayReady: (play: () => void) => void }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    onPlayReady(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
 
-    audio.volume = 0.35;
-
-    // Try immediate autoplay first.
-    void audio.play().catch(() => {
-      // Some browsers require user interaction before audio can start.
-    });
-
-    const resumeAudio = () => {
+      audio.volume = 0.35;
       void audio.play().catch(() => {
-        // Ignore if still blocked by browser policy.
+        // Ignore if blocked by browser policy.
       });
-    };
-
-    window.addEventListener("click", resumeAudio, { once: true });
-    window.addEventListener("touchstart", resumeAudio, { once: true });
-
-    return () => {
-      window.removeEventListener("click", resumeAudio);
-      window.removeEventListener("touchstart", resumeAudio);
-    };
-  }, []);
+    });
+  }, [onPlayReady]);
 
   return (
-    <audio ref={audioRef} loop autoPlay preload="auto" hidden>
-      <source src="/music/background.mp3" type="audio/mpeg" />
+    <audio ref={audioRef} loop preload="auto" hidden>
+      <source src={AUDIO_PATHS.background} type="audio/mpeg" />
+    </audio>
+  );
+}
+
+function SurpriseSoundEffect({ onPlayReady }: { onPlayReady: (play: (delayMs?: number) => void) => void }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    onPlayReady((delayMs = 0) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      audio.volume = 0.7;
+      audio.currentTime = 0;
+
+      const play = () => {
+        void audio.play().catch(() => {
+          // Ignore if blocked by browser policy.
+        });
+      };
+
+      if (delayMs <= 0) {
+        play();
+        return;
+      }
+
+      // Unlock audio during the envelope click, then play when the surprise screen appears.
+      void audio.play()
+        .then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          setTimeout(play, delayMs);
+        })
+        .catch(() => {});
+    });
+  }, [onPlayReady]);
+
+  return (
+    <audio ref={audioRef} preload="auto" hidden>
+      <source src={AUDIO_PATHS.surprise} type="audio/mpeg" />
     </audio>
   );
 }
 
 // ─── Hero Section ─────────────────────────────────────────────────────────────
-function HeroSection() {
+type HeroPhase = "envelope" | "surprise" | "invitation";
+
+const SURPRISE_REVEAL_DELAY_MS = 600;
+
+function HeroSection({
+  isLocked,
+  onSurpriseEnter,
+  onInvitationReveal,
+}: {
+  isLocked: boolean;
+  onSurpriseEnter: () => void;
+  onInvitationReveal: () => void;
+}) {
+  const [phase, setPhase] = useState<HeroPhase>("envelope");
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
-  const [showContent, setShowContent] = useState(false);
 
   const handleOpen = () => {
     setEnvelopeOpen(true);
-    setTimeout(() => setShowContent(true), 600);
+    onSurpriseEnter();
+    setTimeout(() => setPhase("surprise"), SURPRISE_REVEAL_DELAY_MS);
+  };
+
+  const handleRevealInvitation = () => {
+    onInvitationReveal();
+    setPhase("invitation");
   };
 
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4 py-20"
+      className={`relative flex flex-col items-center justify-center overflow-hidden px-4 py-20 ${
+        isLocked ? "fixed inset-0 z-20 h-screen" : "min-h-screen"
+      }`}
       style={{
         background: "linear-gradient(160deg, oklch(0.97 0.02 38) 0%, oklch(0.95 0.03 35) 40%, oklch(0.96 0.025 38) 100%)",
       }}
@@ -106,7 +152,7 @@ function HeroSection() {
       {/* Main Content */}
       <div className="relative z-10 max-w-3xl w-full mx-auto text-center">
         <AnimatePresence mode="wait">
-          {!showContent ? (
+          {phase === "envelope" ? (
             // Envelope / Opening screen
             <motion.div
               key="envelope"
@@ -184,6 +230,81 @@ function HeroSection() {
                   Click to reveal your invitation ✨
                 </p>
               </motion.div>
+            </motion.div>
+          ) : phase === "surprise" ? (
+            // Surprise reveal screen
+            <motion.div
+              key="surprise"
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ type: "spring", stiffness: 280, damping: 32 }}
+              className="flex flex-col items-center gap-8 max-w-lg mx-auto px-2"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 20 }}
+                className="text-6xl"
+                aria-hidden
+              >
+                🤫
+              </motion.div>
+
+              <div className="space-y-4">
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="text-xl md:text-2xl text-foreground leading-relaxed"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                  Shh, don&apos;t tell the couple.
+                </motion.p>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-2xl md:text-4xl font-bold tracking-wide"
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    background: "linear-gradient(135deg, var(--primary), var(--ring))",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  It&apos;s a SURPRISE party!
+                </motion.p>
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                className="text-sm text-muted-foreground italic max-w-sm"
+              >
+                Keep this between us — then tap below to see the invitation details.
+              </motion.p>
+
+              <motion.button
+                type="button"
+                onClick={handleRevealInvitation}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65 }}
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white font-semibold cursor-pointer"
+                style={{
+                  background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, var(--ring)))",
+                  boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent)",
+                }}
+              >
+                <Sparkles className="w-5 h-5" />
+                I promise — open invitation
+              </motion.button>
             </motion.div>
           ) : (
             // Invitation content
@@ -342,7 +463,7 @@ function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      {showContent && (
+      {phase === "invitation" && (
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
           animate={{ y: [0, 8, 0] }}
@@ -413,10 +534,10 @@ function CountdownSection() {
 // ─── Event Details Section ─────────────────────────────────────────────────────
 function EventDetailsSection() {
   const details = [
-    { icon: Calendar, label: "Date", value: EVENT_DETAILS.date, emoji: "📆" },
-    { icon: Clock, label: "Time", value: EVENT_DETAILS.time, emoji: "⏰" },
-    { icon: MapPin, label: "Venue", value: EVENT_DETAILS.venue, sub: EVENT_DETAILS.address, emoji: "📍" },
-    { icon: Shirt, label: "Dress Code", value: EVENT_DETAILS.dressCode, emoji: "👗" },
+    { icon: Calendar, label: "Date", value: EVENT_DETAILS.date },
+    { icon: Clock, label: "Time", value: EVENT_DETAILS.time },
+    { icon: MapPin, label: "Venue", value: EVENT_DETAILS.venue },
+    { icon: Shirt, label: "Dress Code", value: EVENT_DETAILS.dressCode },
   ];
 
   return (
@@ -448,7 +569,7 @@ function EventDetailsSection() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {details.map(({ label, value, sub, emoji }) => (
+          {details.map(({ icon: Icon, label, value }) => (
             <motion.div
               key={label}
               variants={staggerItem}
@@ -461,15 +582,20 @@ function EventDetailsSection() {
                 border: "1px solid var(--border)",
               }}
             >
-              <span className="text-3xl">{emoji}</span>
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                style={{
+                  background: "color-mix(in srgb, var(--primary) 10%, transparent)",
+                  color: "var(--primary)",
+                }}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium mb-1">
                   {label}
                 </p>
                 <p className="font-semibold text-foreground">{value}</p>
-                {sub && (
-                  <p className="text-sm text-muted-foreground mt-0.5">{sub}</p>
-                )}
               </div>
             </motion.div>
           ))}
@@ -707,7 +833,7 @@ function RSVPSection() {
       <div className="max-w-2xl mx-auto">
         <SectionReveal className="text-center mb-12">
           <p className="text-xs uppercase tracking-widest font-medium text-muted-foreground mb-3">
-            RSVP — Kindly Confirm By August 1st
+            RSVP — Kindly Confirm By August 17th
           </p>
           <h2
             className="text-3xl md:text-5xl font-bold"
@@ -785,23 +911,30 @@ function FooterSection() {
 }
 
 // ─── Nav Bar ─────────────────────────────────────────────────────────────────
-function NavBar() {
+function NavBar({ visible }: { visible: boolean }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    if (!visible) return;
+
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [visible]);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  if (!visible) return null;
+
   return (
     <motion.nav
       className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-4"
+      initial={{ opacity: 0, y: -12 }}
       animate={{
+        opacity: 1,
+        y: 0,
         background: scrolled
           ? "color-mix(in srgb, var(--background) 95%, transparent)"
           : "transparent",
@@ -809,7 +942,12 @@ function NavBar() {
           ? "0 2px 20px color-mix(in srgb, var(--primary) 10%, transparent)"
           : "none",
       }}
-      transition={{ duration: 0.3 }}
+      transition={{
+        opacity: { duration: 0.4, delay: 0.15 },
+        y: { duration: 0.4, delay: 0.15 },
+        background: { duration: 0.3 },
+        boxShadow: { duration: 0.3 },
+      }}
       style={{
         backdropFilter: scrolled ? "none" : "none",
         borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
@@ -852,17 +990,67 @@ function NavBar() {
 }
 
 // ─── Main Page Export ─────────────────────────────────────────────────────────
+function useScrollLock(locked: boolean) {
+  useEffect(() => {
+    if (!locked) return;
+
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    const previousTouchAction = body.style.touchAction;
+
+    body.style.overflow = "hidden";
+    body.style.touchAction = "none";
+
+    return () => {
+      body.style.overflow = previousOverflow;
+      body.style.touchAction = previousTouchAction;
+    };
+  }, [locked]);
+}
+
 export default function Home() {
+  const playMusicRef = useRef<(() => void) | null>(null);
+  const playSurpriseSoundRef = useRef<((delayMs?: number) => void) | null>(null);
+  const [invitationRevealed, setInvitationRevealed] = useState(false);
+
+  useScrollLock(!invitationRevealed);
+
+  const handlePlayReady = useCallback((play: () => void) => {
+    playMusicRef.current = play;
+  }, []);
+
+  const handleSurpriseSoundReady = useCallback((play: (delayMs?: number) => void) => {
+    playSurpriseSoundRef.current = play;
+  }, []);
+
+  const handleSurpriseEnter = useCallback(() => {
+    playSurpriseSoundRef.current?.(SURPRISE_REVEAL_DELAY_MS);
+  }, []);
+
+  const handleInvitationReveal = useCallback(() => {
+    playMusicRef.current?.();
+    setInvitationRevealed(true);
+  }, []);
+
   return (
-    <div className="min-h-screen">
-      <BackgroundMusic />
-      <NavBar />
-      <HeroSection />
-      <CountdownSection />
-      <EventDetailsSection />
-      <CelebrationSection />
-      <RSVPSection />
-      <FooterSection />
+    <div className={invitationRevealed ? "min-h-screen" : "h-screen overflow-hidden"}>
+      <BackgroundMusic onPlayReady={handlePlayReady} />
+      <SurpriseSoundEffect onPlayReady={handleSurpriseSoundReady} />
+      <NavBar visible={invitationRevealed} />
+      <HeroSection
+        isLocked={!invitationRevealed}
+        onSurpriseEnter={handleSurpriseEnter}
+        onInvitationReveal={handleInvitationReveal}
+      />
+      {invitationRevealed && (
+        <>
+          <CountdownSection />
+          <EventDetailsSection />
+          <CelebrationSection />
+          <RSVPSection />
+          <FooterSection />
+        </>
+      )}
     </div>
   );
 }
